@@ -23,20 +23,40 @@ const Home = () => {
   const fetchFeaturedAnimals = async () => {
     try {
       const response = await axios.get('/api/animals?limit=6&status=available');
-      setFeaturedAnimals(response.data.animals);
+      const data = response?.data?.animals ?? [];
+      setFeaturedAnimals(data);
     } catch (error) {
       console.error('Error fetching featured animals:', error);
+      setFeaturedAnimals([]); // fallback to avoid map crash
     }
   };
+
 
   const fetchStats = async () => {
     try {
       const response = await axios.get('/api/stats');
-      setStats(response.data.overview);
+      const safeOverview = response?.data?.overview;
+
+      if (safeOverview) {
+        setStats(safeOverview);
+      } else {
+        setStats({
+          totalAnimals: 0,
+          totalAdoptions: 0,
+          totalUsers: 0
+        });
+      }
     } catch (error) {
       console.error('Error fetching stats:', error);
+      // fallback to default values to prevent crash
+      setStats({
+        totalAnimals: 0,
+        totalAdoptions: 0,
+        totalUsers: 0
+      });
     }
   };
+
 
   const handleSearch = (e) => {
     e.preventDefault();
